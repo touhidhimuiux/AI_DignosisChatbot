@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Notes Disease Prediction</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: float 20s infinite ease-in-out;
+        pointer-events: none;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(30px, 30px) rotate(10deg); }
+    }
+
+    .wrapper {
+        width: 100%;
+        max-width: 500px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .icon {
+        font-size: 50px;
+        color: #667eea;
+        margin-bottom: 15px;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    h1 {
+        color: #333;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .subtitle {
+        color: #666;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        border: 2px dashed #667eea;
+        border-radius: 15px;
+        padding: 30px 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    }
+
+    .file-input-wrapper:hover {
+        border-color: #764ba2;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+
+    .file-input-wrapper input[type="file"] {
+        display: none;
+    }
+
+    .file-label {
+        display: block;
+        cursor: pointer;
+        color: #667eea;
+        font-weight: 600;
+    }
+
+    .file-label i {
+        font-size: 32px;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .file-label p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .file-name {
+        margin-top: 10px;
+        color: #764ba2;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 14px 30px;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    button:active {
+        transform: translateY(-1px);
+    }
+
+    button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    .spinner {
+        margin: 30px auto;
+        width: 60px;
+        height: 60px;
+        position: relative;
+    }
+
+    .spinner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 4px solid rgba(102, 126, 234, 0.2);
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .result {
+        margin-top: 20px;
+        animation: slideUp 0.6s ease-out;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    .result::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .result::-webkit-scrollbar-track {
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 10px;
+    }
+
+    .result::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+    }
+
+    .result-card {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        border-radius: 15px;
+        padding: 16px;
+        margin-bottom: 0;
+        border-left: 4px solid #667eea;
+    }
+
+    .result-card.success {
+        border-left-color: #10b981;
+    }
+
+    .result-card h3 {
+        color: #333;
+        font-size: 18px;
+        margin-bottom: 12px;
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .result-card h3 i {
+        margin-right: 8px;
+        color: #667eea;
+    }
+
+    .result-row {
+        display: flex;
+        margin-bottom: 8px;
+        font-size: 13px;
+        align-items: flex-start;
+    }
+
+    .result-label {
+        font-weight: 600;
+        color: #764ba2;
+        min-width: 100px;
+        flex-shrink: 0;
+    }
+
+    .result-value {
+        color: #555;
+        flex: 1;
+        word-break: break-word;
+    }
+
+    .medicine-badge, .specialist-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        margin: 2px 3px 2px 0;
+        font-weight: 600;
+    }
+
+    .error {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+        border-left-color: #ef4444;
+        color: #dc2626;
+    }
+
+    @media (max-width: 600px) {
+        .container {
+            padding: 25px;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+
+        .result-label {
+            min-width: 120px;
+        }
+    }
+</style>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <div class="icon">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <h1>Clinical Diagnosis AI</h1>
+                <p class="subtitle">Intelligent disease prediction from clinical notes</p>
+            </div>
+
+            <form action="/predict/" method="post" enctype="multipart/form-data" id="uploadForm">
+                <div class="form-group">
+                    <label class="file-input-wrapper" id="fileLabel">
+                        <input type="file" name="file" id="fileInput" accept=".txt,.pdf" required>
+                        <span class="file-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload or drag & drop</p>
+                            <p style="font-size: 12px; color: #999; margin-top: 5px;">PDF or TXT files</p>
+                        </span>
+                        <div class="file-name" id="fileName"></div>
+                    </label>
+                </div>
+                <button type="submit" id="submit-btn">
+                    <i class="fas fa-brain"></i> Analyze & Predict
+                </button>
+            </form>
+
+            <div id="spinner" class="spinner" style="display:none;"></div>
+            <div id="result" class="result" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+    const form = document.getElementById("uploadForm");
+    const fileInput = document.getElementById("fileInput");
+    const fileName = document.getElementById("fileName");
+    const spinner = document.getElementById("spinner");
+    const resultDiv = document.getElementById("result");
+    const submitBtn = document.getElementById("submit-btn");
+
+    // File input display name
+    fileInput.addEventListener("change", (e) => {
+        if (e.target.files.length > 0) {
+            fileName.textContent = `📄 ${e.target.files[0].name}`;
+        }
+    });
+
+    // Drag and drop
+    const fileLabel = document.getElementById("fileLabel");
+    fileLabel.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        fileLabel.style.borderColor = "#764ba2";
+        fileLabel.style.background = "linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%)";
+    });
+
+    fileLabel.addEventListener("dragleave", () => {
+        fileLabel.style.borderColor = "#667eea";
+        fileLabel.style.background = "linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)";
+    });
+
+    fileLabel.addEventListener("drop", (e) => {
+        e.preventDefault();
+        fileLabel.style.borderColor = "#667eea";
+        fileLabel.style.background = "linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)";
+        fileInput.files = e.dataTransfer.files;
+        if (fileInput.files.length > 0) {
+            fileName.textContent = `📄 ${fileInput.files[0].name}`;
+        }
+    });
+
+    form.onsubmit = async (event) => {
+        event.preventDefault();
+        spinner.style.display = "block";
+        resultDiv.innerHTML = "";
+        resultDiv.style.display = "none";
+        submitBtn.disabled = true;
+
+        try {
+            const formData = new FormData(form);
+            const response = await fetch('/predict/', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error("Error processing the clinical notes. Please try again.");
+            }
+
+            const data = await response.json();
+            spinner.style.display = "none";
+
+            resultDiv.innerHTML = `
+                <div class="result-card success">
+                    <h3><i class="fas fa-check-circle"></i> Diagnosis Result</h3>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-disease"></i> Disease:</span>
+                        <span class="result-value"><strong>${data.predicted_disease}</strong></span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-info-circle"></i> Info:</span>
+                        <span class="result-value">${data.description}</span>
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-pills"></i> Medicines:</span>
+                    </div>
+                    <div style="margin-left: 100px; margin-bottom: 8px; margin-top: -8px;">
+                        ${data.medicines.map(med => `<span class="medicine-badge">${med}</span>`).join('')}
+                    </div>
+                    
+                    <div class="result-row">
+                        <span class="result-label"><i class="fas fa-user-md"></i> Specialists:</span>
+                    </div>
+                    <div style="margin-left: 100px;">
+                        ${data.specialists.map(spec => `<span class="specialist-badge">${spec}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            resultDiv.style.display = "block";
+        } catch (error) {
+            spinner.style.display = "none";
+            resultDiv.innerHTML = `
+                <div class="result-card error">
+                    <h3><i class="fas fa-exclamation-circle"></i> Error</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
+            resultDiv.style.display = "block";
+        } finally {
+            submitBtn.disabled = false;
+        }
+    };
+    </script>
+</body>
+</html>
